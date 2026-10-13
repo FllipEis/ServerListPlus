@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.prexorjustin.serverlistplus.mixin",
+  "compatibilityLevel": "${java}",
+  "client": [
+    "AbstractSelectionListInvoker",
+    "AbstractSelectionListMixin",
+    "DirectJoinServerScreenMixin",
+    "JoinMultiplayerScreenMixin",
+    "OnlineServerEntryMixin",
+    "ServerListAccessor",
+    "ServerSelectionListMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

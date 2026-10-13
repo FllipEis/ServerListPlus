@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "serverlistplus-gametest",
+  "version": "1.0.0",
+  "name": "ServerListPlus Client Game Tests",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "me.prexorjustin.serverlistplus.gametest.ServerListScreensTest",
+      "me.prexorjustin.serverlistplus.gametest.ReadmeScreenshots"
+    ]
+  },
+  "depends": {
+    "serverlistplus": "*"
+  }
+}

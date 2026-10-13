@@ -1,0 +1,89 @@
+name: Publish
+
+# Uploads an already released tag again, e.g. when one platform failed during the release or
+# to add a platform later. Run it from the Actions tab; the upload ids are taken from main.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to upload, e.g. v1.0.0'
+        required: true
+      platform:
+        description: 'Where to upload'
+        type: choice
+        options: [ both, modrinth, curseforge ]
+        default: both
+      loader:
+        description: 'Which loader'
+        type: choice
+        options: [ all, fabric, neoforge ]
+        default: all
+      versions:
+        description: 'Version nodes, comma separated (e.g. 1.21.8, 26.3); empty for all'
+        required: false
+        default: ''
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # 21 for <= 1.21.11, 25 for 26.1+ (last one is the default JAVA_HOME)
+          java-version: |
+            21
+            25
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Take the upload ids from main
+        run: |
+          main=$(git show origin/main:stonecutter.properties.toml)
+          for key in modrinth_id curseforge_id; do
+            id=$(echo "$main" | sed -n "s/^publish.$key = \"\(.*\)\"/\1/p")
+            sed -i "s/^publish.$key = .*/publish.$key = \"$id\"/" stonecutter.properties.toml
+          done
+
+      - name: Pick the tasks
+        env:
+          PLATFORM: ${{ inputs.platform }}
+          LOADER: ${{ inputs.loader }}
+          VERSIONS: ${{ inputs.versions }}
+        run: |
+          case "$PLATFORM" in
+            modrinth) names="publishModrinth" ;;
+            curseforge) names="publishCurseforge" ;;
+            *) names="publishModrinth publishCurseforge" ;;
+          esac
+          wanted=",$(echo "$VERSIONS" | tr -d ' '),"
+
+          tasks=""
+          for dir in versions/*/; do
+            node=$(basename "$dir")
+            mc=${node%-*}
+            loader=${node##*-}
+            [ "$LOADER" = all ] || [ "$LOADER" = "$loader" ] || continue
+            [ "$wanted" = ",," ] || [[ "$wanted" == *",$mc,"* ]] || continue
+            for name in $names; do tasks="$tasks :$node:$name"; done
+          done
+
+          if [ -z "$tasks" ]; then
+            echo "No version matches; nodes are: $(ls versions | tr '\n' ' ')"
+            exit 1
+          fi
+          echo "Tasks:$tasks"
+          echo "TASKS=$tasks" >> "$GITHUB_ENV"
+
+      # MODRINTH_TOKEN also turns off the dry run, so it is needed for CurseForge only uploads too
+      - name: Upload
+        run: ./gradlew $TASKS --console=plain
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}

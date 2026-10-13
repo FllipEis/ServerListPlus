@@ -1,27 +1,30 @@
 {
   "schemaVersion": 1,
-  "id": "serverlistplus",
+  "id": "${id}",
   "version": "${version}",
-  "name": "ServerListPlus",
-  "description": "ServerListPlus is a Minecraft mod that lets users organize, filter, and search servers in the server list for a streamlined multiplayer experience.",
+  "name": "${name}",
+  "description": "Organize, search, sort and annotate the servers in your multiplayer server list.",
   "authors": [
     "PrexorJustin"
   ],
-  "contact": {},
-  "license": "Apache License 2.0",
+  "contact": {
+    "sources": "https://github.com/PrexorJustin/ServerListPlus",
+    "issues": "https://github.com/PrexorJustin/ServerListPlus/issues"
+  },
+  "license": "MIT",
   "icon": "assets/serverlistplus/icon.png",
   "environment": "client",
   "entrypoints": {
-    "main": [
-      "me.prexorjustin.serverlistplus.ServerListPlus"
+    "client": [
+      "me.prexorjustin.serverlistplus.platform.ServerListPlusFabric"
     ]
   },
   "mixins": [
     "serverlistplus.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "fabricloader": ">=${loader}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft}"
   }
 }

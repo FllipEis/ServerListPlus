@@ -1,0 +1,51 @@
+name: Release
+
+# Pushing a tag like `v1.0.0` builds every version, uploads the jars to Modrinth (and CurseForge
+# once `publish.curseforge_id` is set) and creates a GitHub release with the same jars.
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # 21 for <= 1.21.11, 25 for 26.1+ (last one is the default JAVA_HOME)
+          java-version: |
+            21
+            25
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Check that the tag matches the mod version
+        run: |
+          version=$(sed -n 's/^mod.version = "\(.*\)"/\1/p' stonecutter.properties.toml)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match mod.version $version in stonecutter.properties.toml"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Build, test and upload to Modrinth and CurseForge
+        run: ./gradlew buildAndCollect :core:test publishMods --console=plain
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+
+      - name: Create the GitHub release
+        run: |
+          # The CHANGELOG.md section of this version, without its heading
+          awk -v v="## [$VERSION]" 'index($0, v) == 1 { found = 1; next } found && /^## / { exit } found' CHANGELOG.md > notes.md
+          gh release create "$GITHUB_REF_NAME" --title "ServerListPlus $VERSION" --notes-file notes.md \
+            $(ls build/libs/$VERSION/*.jar | grep -v -- '-sources.jar')
+        env:
+          GH_TOKEN: ${{ github.token }}

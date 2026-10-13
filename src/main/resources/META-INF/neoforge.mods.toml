@@ -1,0 +1,24 @@
+license = "MIT"
+issueTrackerURL = "https://github.com/PrexorJustin/ServerListPlus/issues"
+
+modLoader = "javafml"
+loaderVersion = "[1,)"
+
+[[mods]]
+modId = "${id}"
+displayName = "${name}"
+version = "${version}"
+authors = "PrexorJustin"
+description = "Organize, search, sort and annotate the servers in your multiplayer server list."
+logoFile = "assets/serverlistplus/icon.png"
+displayURL = "https://github.com/PrexorJustin/ServerListPlus"
+
+[[mixins]]
+config = "serverlistplus.mixins.json"
+
+[[dependencies.${id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft}"
+ordering = "NONE"
+side = "CLIENT"
