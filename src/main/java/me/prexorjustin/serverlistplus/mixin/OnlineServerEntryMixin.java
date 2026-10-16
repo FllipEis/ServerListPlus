@@ -7,8 +7,9 @@ import me.prexorjustin.serverlistplus.bridge.ServerView;
 import me.prexorjustin.serverlistplus.compat.Gfx;
 import me.prexorjustin.serverlistplus.core.model.Activity;
 import me.prexorjustin.serverlistplus.core.model.ServerMeta;
-import me.prexorjustin.serverlistplus.ui.Glyph;
-import me.prexorjustin.serverlistplus.ui.InfoText;
+import me.prexorjustin.serverlistplus.ui.widget.Glyph;
+import me.prexorjustin.serverlistplus.ui.text.InfoText;
+import me.prexorjustin.serverlistplus.ui.text.NotePreview;
 import net.minecraft.network.chat.Component;
 import me.prexorjustin.serverlistplus.core.sort.SortMode;
 import net.minecraft.client.Minecraft;
@@ -17,7 +18,7 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
 import net.minecraft.client.multiplayer.ServerData;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import me.prexorjustin.serverlistplus.ui.NameText;
+import me.prexorjustin.serverlistplus.ui.text.NameText;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,6 +40,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 public abstract class OnlineServerEntryMixin implements ServerEntryHook {
     @Unique
     private static final int PIN_COLOR = 0xFFE5484D;
+    @Unique
+    private static final int NOTE_COLOR = 0xFFE8C468;
     /** Vanilla draws the name right of the 32px icon plus 3px gap. */
     @Unique
     private static final int NAME_OFFSET = 32 + 3;
@@ -55,9 +58,27 @@ public abstract class OnlineServerEntryMixin implements ServerEntryHook {
         throw new AssertionError();
     }
 
+    /** Where the notes symbol was drawn last frame; x is MIN_VALUE when none was drawn. */
+    @Unique
+    private int serverlistplus$noteX = Integer.MIN_VALUE;
+    @Unique
+    private int serverlistplus$noteY;
+
     @Override
     public void serverlistplus$refreshStatus() {
         refreshStatus();
+    }
+
+    @Override
+    public boolean serverlistplus$isOverNotes(double x, double y) {
+        return serverlistplus$overNote(serverlistplus$noteX, serverlistplus$noteY, x, y);
+    }
+
+    /** Slightly larger than the symbol, so it is easy to hit. */
+    @Unique
+    private static boolean serverlistplus$overNote(int noteX, int noteY, double x, double y) {
+        return noteX != Integer.MIN_VALUE && x >= noteX - 2 && x <= noteX + Glyph.NOTE.width() + 1
+            && y >= noteY - 2 && y <= noteY + Glyph.NOTE.height() + 1;
     }
 
     /**
@@ -132,12 +153,18 @@ public abstract class OnlineServerEntryMixin implements ServerEntryHook {
     }
 
     /**
-     * Everything after the server name on the first line: pin star, "2 d ago · 14 h" and tag chips,
+     * Everything after the server name on the first line: pin, notes symbol, "2 d ago · 14 h" and tag chips,
      * as far as there is room before the player count. Depending on the settings the time is
      * shown as a clock symbol or only as a tooltip while the row is hovered.
      */
     @Unique
     private void serverlistplus$drawDetails(Gfx gfx, int contentX, int contentY, int contentRight, int mouseX, int mouseY, boolean hovered) {
+        if (((MultiplayerScreenHook) screen).serverlistplus$isCardCovering()) {
+            // The card covers the row: no tooltips from under it
+            mouseX = Integer.MIN_VALUE;
+            mouseY = Integer.MIN_VALUE;
+            hovered = false;
+        }
         Font font = Minecraft.getInstance().font;
         int y = contentY + 1;
         Component name = NameText.of(serverData.name);
@@ -147,6 +174,16 @@ public abstract class OnlineServerEntryMixin implements ServerEntryHook {
         if (ServerView.isPinned(serverData)) {
             Glyph.PIN.draw(gfx, x, y, PIN_COLOR);
             x += Glyph.PIN.width() + 4;
+        }
+        ServerMeta meta = ServerView.meta(serverData);
+        serverlistplus$noteX = Integer.MIN_VALUE;
+        if (meta != null && !meta.notes().isBlank() && x + Glyph.NOTE.width() <= limit) {
+            serverlistplus$noteX = x;
+            serverlistplus$noteY = y;
+            boolean over = serverlistplus$overNote(x, y, mouseX, mouseY);
+            Glyph.NOTE.draw(gfx, x, y, over ? TAG_TEXT : NOTE_COLOR);
+            if (over) gfx.tooltip(font, NotePreview.tooltip(font, meta.notes()), mouseX, mouseY);
+            x += Glyph.NOTE.width() + 5;
         }
         Activity activity = ServerView.activity(serverData);
         Component summary = InfoText.summary(activity);
@@ -165,13 +202,14 @@ public abstract class OnlineServerEntryMixin implements ServerEntryHook {
                 case ICON -> x = serverlistplus$drawClock(gfx, font, summary, x, y, limit, mouseX, mouseY);
                 case HOVER -> {
                     // Not over ping and player count, which have tooltips of their own
-                    if (hovered && mouseX < limit) gfx.tooltip(font, summary, mouseX, mouseY);
+                    if (hovered && mouseX < limit && !serverlistplus$overNote(serverlistplus$noteX, serverlistplus$noteY, mouseX, mouseY)) {
+                        gfx.tooltip(font, summary, mouseX, mouseY);
+                    }
                 }
                 case OFF -> {
                 }
             }
         }
-        ServerMeta meta = ServerView.meta(serverData);
         if (meta == null) return;
         for (String tag : meta.tags()) {
             int width = font.width(tag) + 6;

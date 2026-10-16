@@ -1,4 +1,4 @@
-package me.prexorjustin.serverlistplus.ui;
+package me.prexorjustin.serverlistplus.ui.serverlist;
 
 import me.prexorjustin.serverlistplus.compat.Gfx;
 import net.minecraft.client.Minecraft;

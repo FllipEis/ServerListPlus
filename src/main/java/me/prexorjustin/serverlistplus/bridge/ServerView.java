@@ -225,6 +225,28 @@ public final class ServerView {
             public int onlinePlayers() {
                 return data.state() == ServerData.State.SUCCESSFUL && data.players != null ? data.players.online() : -1;
             }
+
+            @Override
+            public Status status() {
+                return switch (data.state()) {
+                    // A server on another version still answered
+                    case SUCCESSFUL, INCOMPATIBLE -> Status.ONLINE;
+                    case UNREACHABLE -> Status.OFFLINE;
+                    default -> Status.UNKNOWN;
+                };
+            }
+
+            @Override
+            public long lastPlayed() {
+                Activity activity = activity(data);
+                return activity == null ? 0 : activity.lastPlayed();
+            }
+
+            @Override
+            public long playtimeMs() {
+                Activity activity = activity(data);
+                return activity == null ? 0 : activity.playtimeMs();
+            }
         };
     }
 }

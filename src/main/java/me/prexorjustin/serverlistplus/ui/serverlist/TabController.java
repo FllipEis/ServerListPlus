@@ -9,10 +9,10 @@ import me.prexorjustin.serverlistplus.core.model.Folder;
 import me.prexorjustin.serverlistplus.core.model.TabLayout;
 import me.prexorjustin.serverlistplus.core.model.ViewSettings;
 import me.prexorjustin.serverlistplus.core.style.Styled;
-import me.prexorjustin.serverlistplus.ui.ContextMenu;
-import me.prexorjustin.serverlistplus.ui.TabBar;
-import me.prexorjustin.serverlistplus.ui.TabSidebar;
-import me.prexorjustin.serverlistplus.ui.TabStrip;
+import me.prexorjustin.serverlistplus.ui.widget.ContextMenu;
+import me.prexorjustin.serverlistplus.ui.widget.TabBar;
+import me.prexorjustin.serverlistplus.ui.widget.TabSidebar;
+import me.prexorjustin.serverlistplus.ui.widget.TabStrip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -240,10 +240,6 @@ final class TabController implements TabStrip.Listener {
     }
 
     // ---- Renaming in place ----
-
-    boolean isEditing() {
-        return editor != null;
-    }
 
     /**
      * Renames a tab in place: the tab itself becomes a borderless text field that grows while typing.

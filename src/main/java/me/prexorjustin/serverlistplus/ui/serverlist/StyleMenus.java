@@ -4,8 +4,7 @@ import me.prexorjustin.serverlistplus.core.style.FolderIcons;
 import me.prexorjustin.serverlistplus.core.style.Palette;
 import me.prexorjustin.serverlistplus.core.style.Styled;
 import me.prexorjustin.serverlistplus.core.style.Wallpaper;
-import me.prexorjustin.serverlistplus.ui.ContextMenu;
-import me.prexorjustin.serverlistplus.ui.Wallpapers;
+import me.prexorjustin.serverlistplus.ui.widget.ContextMenu;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 

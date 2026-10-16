@@ -1,4 +1,4 @@
-package me.prexorjustin.serverlistplus.ui;
+package me.prexorjustin.serverlistplus.ui.text;
 
 import me.prexorjustin.serverlistplus.core.model.Activity;
 import me.prexorjustin.serverlistplus.core.session.TimeFormat;

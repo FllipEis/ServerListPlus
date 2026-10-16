@@ -11,6 +11,8 @@ import java.util.Map;
  */
 public final class ServerMeta {
     private String notes = "";
+    /** Show the notes in a toast when joining the server. */
+    private boolean notesOnJoin;
     private List<String> tags = new ArrayList<>();
     /** Folders the server is in, in the order it was added to them. */
     private List<String> folderIds = new ArrayList<>();
@@ -27,6 +29,19 @@ public final class ServerMeta {
 
     public void setNotes(String notes) {
         this.notes = notes == null ? "" : notes;
+    }
+
+    public boolean notesOnJoin() {
+        return notesOnJoin;
+    }
+
+    public void setNotesOnJoin(boolean notesOnJoin) {
+        this.notesOnJoin = notesOnJoin;
+    }
+
+    /** Whether there are notes to show when joining. */
+    public boolean remindsOnJoin() {
+        return notesOnJoin && !notes.isBlank();
     }
 
     public List<String> tags() {
@@ -48,11 +63,6 @@ public final class ServerMeta {
 
     public List<String> folderIds() {
         return List.copyOf(folderIds);
-    }
-
-    /** The folder the server was put into first, null if it is in none. */
-    public String firstFolderId() {
-        return folderIds.isEmpty() ? null : folderIds.getFirst();
     }
 
     public boolean isInFolder(String folderId) {
@@ -117,6 +127,7 @@ public final class ServerMeta {
     void absorb(ServerMeta other) {
         for (String tab : other.pinnedTabs) setPinnedIn(tab, true);
         hiddenInAll |= other.hiddenInAll;
+        notesOnJoin |= other.notesOnJoin;
         for (String folder : other.folderIds) addToFolder(folder);
 
         List<String> merged = new ArrayList<>(tags);

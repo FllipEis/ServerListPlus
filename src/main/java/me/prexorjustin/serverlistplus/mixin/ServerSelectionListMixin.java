@@ -7,8 +7,8 @@ import me.prexorjustin.serverlistplus.bridge.ServerSelectionListHook;
 import me.prexorjustin.serverlistplus.bridge.ServerView;
 import me.prexorjustin.serverlistplus.core.style.Styled;
 import me.prexorjustin.serverlistplus.core.view.DividerLayout;
-import me.prexorjustin.serverlistplus.ui.DividerEntry;
-import me.prexorjustin.serverlistplus.ui.HiddenSectionEntry;
+import me.prexorjustin.serverlistplus.ui.serverlist.DividerEntry;
+import me.prexorjustin.serverlistplus.ui.serverlist.HiddenSectionEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -21,6 +21,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,9 @@ import java.util.List;
 public abstract class ServerSelectionListMixin extends ObjectSelectionList<ServerSelectionList.Entry> implements ServerSelectionListHook {
     @Unique
     private static final int DIVIDER_COLOR = 0xFFA0A0A0;
+    /** Room a row leaves at the sides of the list for the scroll bar. */
+    @Unique
+    private static final int ROW_SIDE_ROOM = 30;
 
     @Shadow
     @Final
@@ -58,6 +62,16 @@ public abstract class ServerSelectionListMixin extends ObjectSelectionList<Serve
         scrollToEntry(entry);
         //?} else
         /*ensureVisible(entry);*/
+    }
+
+    /**
+     * Vanilla's rows are 305 wide. Next to the docked info card the list can be narrower, so the
+     * rows shrink with it; vanilla wraps the MOTD to the row width on every frame.
+     */
+    @Inject(method = "getRowWidth", at = @At("RETURN"), cancellable = true)
+    private void serverlistplus$fitRows(CallbackInfoReturnable<Integer> cir) {
+        int room = this.getWidth() - ROW_SIDE_ROOM;
+        if (room < cir.getReturnValueI()) cir.setReturnValue(room);
     }
 
     /** Filters and sorts the saved servers right before vanilla puts them into the list. */

@@ -1,10 +1,15 @@
 package me.prexorjustin.serverlistplus;
 
+import me.prexorjustin.serverlistplus.platform.Platform;
+import me.prexorjustin.serverlistplus.bridge.ServerView;
+import me.prexorjustin.serverlistplus.compat.Toasts;
 import me.prexorjustin.serverlistplus.core.key.AddressKey;
+import me.prexorjustin.serverlistplus.core.model.ServerMeta;
 import me.prexorjustin.serverlistplus.core.model.Store;
 import me.prexorjustin.serverlistplus.core.session.PlaytimeTracker;
 import me.prexorjustin.serverlistplus.core.storage.JsonStore;
 import net.minecraft.client.Minecraft;
+import me.prexorjustin.serverlistplus.ui.widget.NotesToast;
 import net.minecraft.client.multiplayer.ServerData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +52,10 @@ public final class ServerListPlus {
         if (server == null || server.isLan() || server.isRealm()) return;
         tracker.join(AddressKey.normalize(server.ip));
         save();
+        ServerMeta meta = ServerView.meta(server);
+        if (meta != null && meta.remindsOnJoin()) {
+            Toasts.show(new NotesToast(server.name, meta.notes()));
+        }
     }
 
     /** Called by the loader when the connection ends and when the game closes. */

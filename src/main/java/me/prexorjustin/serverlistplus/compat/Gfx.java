@@ -5,6 +5,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.resources.Identifier;
+
+import java.util.List;
 //? if <1.21.6 {
 /*import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -113,12 +115,14 @@ public final class Gfx {
         *///?}
     }
 
-    public void scissor(int x1, int y1, int x2, int y2) {
-        graphics.enableScissor(x1, y1, x2, y2);
-    }
-
-    public void endScissor() {
-        graphics.disableScissor();
+    /** A tooltip of several lines, e.g. from {@link Font#split}. */
+    public void tooltip(Font font, List<FormattedCharSequence> lines, int x, int y) {
+        //? if >=1.21.6 {
+        graphics.setTooltipForNextFrame(font, lines, x, y);
+        //?} else {
+        /*Screen screen = Minecraft.getInstance().screen;
+        if (screen != null) screen.setTooltipForNextRenderPass(lines);
+        *///?}
     }
 
     /**

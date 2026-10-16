@@ -1,6 +1,6 @@
-package me.prexorjustin.serverlistplus.ui;
+package me.prexorjustin.serverlistplus.ui.serverlist;
 
-import me.prexorjustin.serverlistplus.Platform;
+import me.prexorjustin.serverlistplus.platform.Platform;
 import me.prexorjustin.serverlistplus.ServerListPlus;
 import me.prexorjustin.serverlistplus.bridge.ServerView;
 import me.prexorjustin.serverlistplus.compat.FileManager;

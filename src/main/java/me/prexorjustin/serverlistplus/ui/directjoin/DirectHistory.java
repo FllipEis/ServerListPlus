@@ -1,5 +1,6 @@
-package me.prexorjustin.serverlistplus.ui;
+package me.prexorjustin.serverlistplus.ui.directjoin;
 
+import me.prexorjustin.serverlistplus.ui.widget.SlpWidget;
 import me.prexorjustin.serverlistplus.compat.Gfx;
 import me.prexorjustin.serverlistplus.compat.Pointer;
 import net.minecraft.ChatFormatting;

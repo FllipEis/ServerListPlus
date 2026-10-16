@@ -26,8 +26,11 @@ For how the mod is put together, read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.m
 | `src/main/java/.../bridge/` | Connects vanilla objects (`ServerData`, `ServerList`) to the core. |
 | `src/main/java/.../compat/` | Small wrappers for APIs that differ between Minecraft versions. |
 | `src/main/java/.../mixin/` | Hooks into vanilla classes; kept thin, the logic is elsewhere. |
-| `src/main/java/.../ui/` | Widgets, plus `ui/serverlist/` for everything on the multiplayer screen. |
-| `src/main/java/.../platform/` | Fabric and NeoForge entry points. |
+| `src/main/java/.../ui/serverlist/` | Everything on the multiplayer screen: layout, menus, info card, drag and drop. |
+| `src/main/java/.../ui/directjoin/` | The Direct Connection screen: preview of the typed server and recent addresses. |
+| `src/main/java/.../ui/widget/` | Reusable widgets: buttons, menus, tabs, the notes toast. They know nothing about the server list. |
+| `src/main/java/.../ui/text/` | Texts shown in several places: formatted names, times, notes previews. |
+| `src/main/java/.../platform/` | Fabric and NeoForge entry points, and `Platform` for the few loader-specific calls. |
 | `src/gametest/` | Client game tests (Fabric, newest Minecraft version only). |
 | `stonecutter.properties.toml` | Dependency versions and compatibility ranges per Minecraft version. |
 | `settings.gradle.kts` | The list of Minecraft versions that are built. |

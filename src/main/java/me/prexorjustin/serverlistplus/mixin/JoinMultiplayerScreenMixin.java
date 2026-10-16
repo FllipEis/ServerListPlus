@@ -12,10 +12,11 @@ import me.prexorjustin.serverlistplus.core.model.Store;
 import me.prexorjustin.serverlistplus.core.naming.FolderPath;
 import me.prexorjustin.serverlistplus.core.query.Query;
 import me.prexorjustin.serverlistplus.core.sort.SortMode;
-import me.prexorjustin.serverlistplus.ui.DividerEntry;
-import me.prexorjustin.serverlistplus.ui.HiddenSectionEntry;
+import me.prexorjustin.serverlistplus.ui.serverlist.DividerEntry;
+import me.prexorjustin.serverlistplus.ui.serverlist.HiddenSectionEntry;
 import me.prexorjustin.serverlistplus.ui.serverlist.ServerListUi;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -144,8 +145,21 @@ public abstract class JoinMultiplayerScreenMixin extends Screen implements Multi
     }
 
     @Override
+    public boolean serverlistplus$isCardCovering() {
+        return serverlistplus$ui != null && serverlistplus$ui.isCardCovering();
+    }
+
+    @Override
     public void serverlistplus$addOverlay(AbstractWidget widget) {
         this.addRenderableOnly(widget);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void serverlistplus$addInFront(AbstractWidget widget) {
+        // Drawn after everything added so far, but first in line for input
+        this.addRenderableOnly(widget);
+        ((List<GuiEventListener>) this.children()).addFirst(widget);
     }
 
     @Override
@@ -210,6 +224,12 @@ public abstract class JoinMultiplayerScreenMixin extends Screen implements Multi
         ServerListPlus.save();
         if (serverlistplus$ui != null) serverlistplus$ui.updateSortTooltip();
         ServerView.refresh(serverSelectionList, servers);
+    }
+
+    /** Joining a server or opening another screen while the info card is open must not lose its edits. */
+    @Inject(method = "removed", at = @At("HEAD"))
+    private void serverlistplus$removed(CallbackInfo ci) {
+        if (serverlistplus$ui != null) serverlistplus$ui.close();
     }
 
     @Inject(method = "tick", at = @At("TAIL"))

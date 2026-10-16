@@ -1,4 +1,4 @@
-package me.prexorjustin.serverlistplus.ui;
+package me.prexorjustin.serverlistplus.ui.text;
 
 import me.prexorjustin.serverlistplus.core.text.MiniText;
 import net.minecraft.network.chat.Component;

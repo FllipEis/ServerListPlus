@@ -9,7 +9,7 @@ It never replaces them; it hooks in with mixins and draws its own widgets on top
             └──────────┬──────────────────────┬─────────────────────┬────────┘
                  mixin/ (thin hooks)          │                     │
             ┌──────────▼───────────┐  ┌───────▼────────┐  ┌─────────▼────────┐
-            │ ui/serverlist/       │  │ bridge/        │  │ ui/DirectJoinUi  │
+            │ ui/serverlist/       │  │ bridge/        │  │ ui/directjoin/   │
             │ tabs, menus, drag…   │──▶ ServerView,    │◀─│ preview, history │
             └──────────┬───────────┘  │ ServerKeys,    │  └──────────────────┘
                        │              │ Pings, …       │
@@ -29,8 +29,12 @@ It never replaces them; it hooks in with mixins and draws its own widgets on top
 - **`compat/`** hides API differences between Minecraft versions behind small classes:
   drawing (`Gfx`), mouse and keys (`Pointer`, `Key`), textures, screens, the file manager.
 - **`mixin/`** contains the hooks. They only collect input and call into `ui/` or `bridge/`.
-- **`ui/`** has the widgets (`TabBar`, `TabSidebar`, `ContextMenu`, `IconButton`, …) and in
-  `ui/serverlist/` everything that runs the multiplayer screen.
+- **`ui/`** is split by screen: `ui/serverlist/` runs the multiplayer screen, `ui/directjoin/`
+  the Direct Connection screen. Both build on `ui/widget/` (`TabBar`, `ContextMenu`,
+  `IconButton`, `NotesToast`, …) and `ui/text/` (names with MiniMessage tags, "2 d ago",
+  notes previews).
+- **`platform/`** has the Fabric and NeoForge entry points and `Platform`, which hides the
+  little that differs between the loaders (config folder, loaded mods).
 
 ## Data model
 
@@ -90,7 +94,8 @@ pointer. The parts share a `UiContext`:
 |---|---|
 | `HeaderRow` | search, sort and settings icons with their menus |
 | `TabController` | tabs as row or sidebar, renaming in place, tab menu |
-| `ServerMenu` | right-click menu of a server and the info card |
+| `ServerMenu` | right-click menu of a server |
+| `InfoCardController` | the info card with notes and tags, docked next to the list or over it |
 | `DividerController` | divider menu, renaming, dragging |
 | `ServerDragging` | dragging servers to reorder or onto tabs |
 | `WallpaperAdjuster` | moving and zooming a tab's background picture |
@@ -102,8 +107,28 @@ dividers and the hidden section are inserted. Dividers and the hidden section he
 vanilla's LAN entry, because the base entry class can't be subclassed from outside its package
 on some versions.
 
-`OnlineServerEntryMixin` draws the pin, last join, playtime and tags after the name, and stops
-vanilla's move buttons from moving servers by list position once the list is filtered.
+`OnlineServerEntryMixin` draws the pin, the notes symbol, last join, playtime and tags after the
+name, and stops vanilla's move buttons from moving servers by list position once the list is
+filtered.
+
+## Notes and the info card
+
+A server with notes shows a symbol after its name; hovering shows the notes (`NotePreview`),
+clicking opens the info card (`ServerInfoPanel`, run by `InfoCardController`).
+
+- **Where the card goes.** `ServerListUi.relayout` docks the card right of the list when the
+  list keeps at least 260 px. `ServerSelectionListMixin` then narrows vanilla's 305 px rows to
+  fit, which vanilla handles because it wraps the MOTD to the row width on every frame. Without
+  that room (small windows, large GUI scale) the card lies over the list instead.
+- **Input.** The card's fields are added in front of the screen's other children
+  (`serverlistplus$addInFront`). Vanilla gives a click to the first child under the pointer,
+  and the list would otherwise take clicks meant for the fields it lies under.
+- **Saving.** The notes and the "show when joining" checkbox write to `ServerMeta` as they
+  change, and leaving the screen (`removed()`) closes the card, so joining straight from the
+  card loses nothing.
+- **On joining.** `ServerListPlus.onJoin` shows a `NotesToast` for servers with "show when
+  joining". Toasts changed their API twice (1.21.2 and 26.1), hence the version comments there
+  and in `compat/Toasts`.
 
 ## Pings
 

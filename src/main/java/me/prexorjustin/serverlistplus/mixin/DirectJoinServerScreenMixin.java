@@ -1,6 +1,6 @@
 package me.prexorjustin.serverlistplus.mixin;
 
-import me.prexorjustin.serverlistplus.ui.DirectJoinUi;
+import me.prexorjustin.serverlistplus.ui.directjoin.DirectJoinUi;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;

@@ -3,6 +3,27 @@
 All notable changes are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Servers with notes show a note symbol next to their name: hover to read the notes, click to edit them.
+- Option per server to show its notes when joining it, in a toast with the server's name and a bar
+  that runs out; longer notes stay longer.
+- Search filters `note:`, `has:notes`, `has:tags`, `has:folder`, `is:online`, `is:offline`,
+  `played:` (total playtime) and `last:` (time since the last join).
+
+### Changed
+- Plain search words also look into the notes.
+- The info card sits next to the server list when there is room, with narrower server rows, and
+  shows whichever server is selected. In small windows it stays over the list and on screen.
+- The info card puts the notes first, with a larger text box.
+
+### Fixed
+- After clicking an empty spot of the info card, clicks on its text fields went to the servers under it.
+- Edits in the info card were lost when joining a server (or leaving the screen) without closing the card first.
+- With the tabs as a sidebar, the server rows could be drawn shifted to the left after leaving a
+  server, until the list was scrolled (Minecraft 1.21.9 and newer).
+
 ## [1.0.0] - 2026-10-13
 
 ### Added

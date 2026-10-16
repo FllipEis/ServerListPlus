@@ -1,4 +1,4 @@
-package me.prexorjustin.serverlistplus;
+package me.prexorjustin.serverlistplus.platform;
 
 import java.nio.file.Path;
 

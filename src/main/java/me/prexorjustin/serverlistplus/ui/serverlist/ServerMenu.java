@@ -1,14 +1,10 @@
 package me.prexorjustin.serverlistplus.ui.serverlist;
 
-import me.prexorjustin.serverlistplus.ui.NameText;
+import me.prexorjustin.serverlistplus.ui.text.NameText;
 import me.prexorjustin.serverlistplus.bridge.ServerView;
-import me.prexorjustin.serverlistplus.compat.Key;
-import me.prexorjustin.serverlistplus.compat.Pointer;
 import me.prexorjustin.serverlistplus.core.model.Folder;
 import me.prexorjustin.serverlistplus.core.model.ServerMeta;
-import me.prexorjustin.serverlistplus.ui.ContextMenu;
-import me.prexorjustin.serverlistplus.ui.ServerInfoPanel;
-import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
+import me.prexorjustin.serverlistplus.ui.widget.ContextMenu;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
 
@@ -16,18 +12,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The right-click menu of a server and the info card with notes and tags it opens.
+ * The right-click menu of a server.
  */
 final class ServerMenu {
     private final UiContext ui;
     private final TabController tabs;
     private final DividerController dividers;
-    private ServerInfoPanel info;
+    private final InfoCardController infoCard;
 
-    ServerMenu(UiContext ui, TabController tabs, DividerController dividers) {
+    ServerMenu(UiContext ui, TabController tabs, DividerController dividers, InfoCardController infoCard) {
         this.ui = ui;
         this.tabs = tabs;
         this.dividers = dividers;
+        this.infoCard = infoCard;
     }
 
     void open(ServerData server, int x, int y) {
@@ -49,7 +46,7 @@ final class ServerMenu {
         items.add(new ContextMenu.Item(Component.translatable("serverlistplus.menu.add_divider"),
             () -> dividers.addAbove(ServerView.key(server)), List.of(), ServerView.dividersShown(ui.hook().serverlistplus$query())));
         items.add(ContextMenu.Item.separator());
-        items.add(ContextMenu.Item.action(Component.translatable("serverlistplus.menu.info"), () -> openInfo(server)));
+        items.add(ContextMenu.Item.action(Component.translatable("serverlistplus.menu.info"), () -> infoCard.open(server)));
         ui.openMenu(items, x, y);
     }
 
@@ -84,54 +81,5 @@ final class ServerMenu {
         ServerView.metaOrCreate(server).setPinnedIn(ServerView.tab(), pinned);
         ui.changed();
         ServerView.select(ui.list(), server);
-    }
-
-    // ---- Info card ----
-
-    boolean isInfoOpen() {
-        return info != null;
-    }
-
-    private void openInfo(ServerData server) {
-        closeInfo();
-        ServerSelectionList list = ui.list();
-        int x = list.getX() + (list.getWidth() - ServerInfoPanel.WIDTH) / 2;
-        info = new ServerInfoPanel(ui.font(), server, ServerView.metaOrCreate(server), x, list.getY() + 6, this::closeInfo);
-        ui.hook().serverlistplus$addOverlay(info);
-        info.children().forEach(ui.hook()::serverlistplus$add);
-        ui.hook().serverlistplus$focus(info.tagInput());
-    }
-
-    /** Keeps what was typed and closes the card. */
-    private void closeInfo() {
-        if (info == null) return;
-        ServerInfoPanel panel = info;
-        info = null;
-        panel.save();
-        panel.children().forEach(ui.hook()::serverlistplus$remove);
-        ui.hook().serverlistplus$remove(panel);
-        ui.changed();
-    }
-
-    /** While the card is open, a click outside closes it and nothing else reacts. */
-    boolean pressInfo(Pointer pointer) {
-        if (!info.isMouseOver(pointer.x(), pointer.y())) {
-            closeInfo();
-            return true;
-        }
-        return info.clickChip(pointer.x(), pointer.y());
-    }
-
-    /** Escape closes the card; Enter adds a tag, but in the notes it starts a new line as usual. */
-    boolean keyInfo(Key key) {
-        if (key == Key.ESCAPE) {
-            closeInfo();
-            return true;
-        }
-        if (key == Key.CONFIRM && info.tagInput().isFocused()) {
-            info.addTypedTags();
-            return true;
-        }
-        return false;
     }
 }

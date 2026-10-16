@@ -6,17 +6,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A parsed search query. All terms must match (AND).
  * <ul>
- *     <li>{@code word} – name, address or MOTD contains the word</li>
+ *     <li>{@code word} – name, address, MOTD or notes contain the word</li>
  *     <li>{@code "two words"} – quoted phrase</li>
  *     <li>{@code tag:pvp} – a tag starts with "pvp"</li>
  *     <li>{@code folder:friends} – the name of one of its folders contains "friends"</li>
+ *     <li>{@code note:base} – the notes contain "base"</li>
+ *     <li>{@code has:notes}, {@code has:tags}, {@code has:folder} – servers with notes, tags or a folder</li>
  *     <li>{@code is:pinned} – servers pinned in any tab</li>
  *     <li>{@code is:hidden} – servers hidden from "All"; searching for it shows them there</li>
+ *     <li>{@code is:online}, {@code is:offline} – the last ping reached the server or failed</li>
  *     <li>{@code ping:<100}, {@code players:>10} – compare ping or online players ({@code <}, {@code >}, {@code =})</li>
+ *     <li>{@code played:>2h} – compares the total playtime, {@code played:0} for never played</li>
+ *     <li>{@code last:<7d} – last joined less than 7 days ago; servers never joined don't match.
+ *         Units: {@code min}, {@code h}, {@code d}, {@code w}, {@code mo}, {@code y}</li>
  *     <li>{@code domain:example.com} – the address is that domain or a subdomain of it;
  *         {@code *} matches anything, e.g. {@code domain:*.example.com} for subdomains only</li>
  *     <li>{@code -term} – negates any of the above</li>
@@ -46,8 +54,13 @@ public final class Query {
      * @param folderName resolves a folder id to its display name, null if unknown
      */
     public boolean matches(ServerRef server, ServerMeta meta, Function<String, String> folderName) {
+        return matches(server, meta, folderName, System.currentTimeMillis());
+    }
+
+    /** @param now epoch millis that {@code last:} counts back from */
+    public boolean matches(ServerRef server, ServerMeta meta, Function<String, String> folderName, long now) {
         for (Term term : terms) {
-            if (term.matches(server, meta, folderName) == term.negated) return false;
+            if (term.matches(server, meta, folderName, now) == term.negated) return false;
         }
         return true;
     }
@@ -89,7 +102,10 @@ public final class Query {
     }
 
     private record Term(Kind kind, String value, boolean negated) {
-        enum Kind { TEXT, TAG, FOLDER, PINNED, HIDDEN, PING, PLAYERS, DOMAIN }
+        enum Kind {
+            TEXT, TAG, FOLDER, NOTE, HAS_NOTES, HAS_TAGS, HAS_FOLDER, PINNED, HIDDEN, ONLINE, OFFLINE,
+            PING, PLAYERS, PLAYED, LAST, DOMAIN
+        }
 
         static Term of(String body, boolean negated) {
             int colon = body.indexOf(':');
@@ -99,9 +115,25 @@ public final class Query {
                 switch (prefix) {
                     case "tag" -> { return value.isEmpty() ? null : new Term(Kind.TAG, value, negated); }
                     case "folder" -> { return value.isEmpty() ? null : new Term(Kind.FOLDER, value, negated); }
+                    case "note", "notes" -> { return value.isEmpty() ? null : new Term(Kind.NOTE, value, negated); }
+                    case "has" -> {
+                        switch (value) {
+                            case "notes", "note" -> { return new Term(Kind.HAS_NOTES, "", negated); }
+                            case "tags", "tag" -> { return new Term(Kind.HAS_TAGS, "", negated); }
+                            case "folder", "folders" -> { return new Term(Kind.HAS_FOLDER, "", negated); }
+                            default -> {
+                            }
+                        }
+                    }
                     case "is" -> {
-                        if (value.equals("pinned")) return new Term(Kind.PINNED, "", negated);
-                        if (value.equals("hidden")) return new Term(Kind.HIDDEN, "", negated);
+                        switch (value) {
+                            case "pinned" -> { return new Term(Kind.PINNED, "", negated); }
+                            case "hidden" -> { return new Term(Kind.HIDDEN, "", negated); }
+                            case "online" -> { return new Term(Kind.ONLINE, "", negated); }
+                            case "offline" -> { return new Term(Kind.OFFLINE, "", negated); }
+                            default -> {
+                            }
+                        }
                     }
                     case "domain", "host" -> {
                         return value.isEmpty() ? null : new Term(Kind.DOMAIN, value, negated);
@@ -112,6 +144,12 @@ public final class Query {
                     case "players" -> {
                         if (Comparison.parse(value) != null) return new Term(Kind.PLAYERS, value, negated);
                     }
+                    case "played", "playtime" -> {
+                        if (Comparison.parseDuration(value) != null) return new Term(Kind.PLAYED, value, negated);
+                    }
+                    case "last" -> {
+                        if (Comparison.parseDuration(value) != null) return new Term(Kind.LAST, value, negated);
+                    }
                     default -> {
                         // Not a filter (e.g. "host:25566"), search it as text
                     }
@@ -121,19 +159,28 @@ public final class Query {
             return value.isEmpty() ? null : new Term(Kind.TEXT, value, negated);
         }
 
-        boolean matches(ServerRef server, ServerMeta meta, Function<String, String> folderName) {
+        boolean matches(ServerRef server, ServerMeta meta, Function<String, String> folderName, long now) {
             return switch (kind) {
                 case TEXT -> normalize(server.name()).contains(value)
                     || normalize(server.address()).contains(value)
-                    || normalize(server.motd()).contains(value);
+                    || normalize(server.motd()).contains(value)
+                    || meta != null && normalize(meta.notes()).contains(value);
                 case TAG -> meta != null && meta.tags().stream().anyMatch(tag -> normalize(tag).startsWith(value));
                 case FOLDER -> meta != null && meta.folderIds().stream()
                     .map(folderName)
                     .anyMatch(name -> name != null && normalize(name).contains(value));
+                case NOTE -> meta != null && normalize(meta.notes()).contains(value);
+                case HAS_NOTES -> meta != null && !meta.notes().isBlank();
+                case HAS_TAGS -> meta != null && !meta.tags().isEmpty();
+                case HAS_FOLDER -> meta != null && !meta.folderIds().isEmpty();
                 case PINNED -> meta != null && meta.isPinnedAnywhere();
                 case HIDDEN -> meta != null && meta.hiddenInAll();
+                case ONLINE -> server.status() == ServerRef.Status.ONLINE;
+                case OFFLINE -> server.status() == ServerRef.Status.OFFLINE;
                 case PING -> server.ping() >= 0 && Comparison.parse(value).test(server.ping());
                 case PLAYERS -> server.onlinePlayers() >= 0 && Comparison.parse(value).test(server.onlinePlayers());
+                case PLAYED -> Comparison.parseDuration(value).test(server.playtimeMs());
+                case LAST -> server.lastPlayed() > 0 && Comparison.parseDuration(value).test(now - server.lastPlayed());
                 case DOMAIN -> domainMatches(host(server.address()), value);
             };
         }
@@ -169,6 +216,11 @@ public final class Query {
 
     /** {@code <100}, {@code >5}, {@code =0} or a bare number (same as {@code =}). */
     private record Comparison(char operator, long number) {
+        private static final long MINUTE = 60_000;
+        private static final long HOUR = 60 * MINUTE;
+        private static final long DAY = 24 * HOUR;
+        private static final Pattern DURATION = Pattern.compile("(\\d+)\\s*(min|mo|m|h|d|w|y)?");
+
         static Comparison parse(String value) {
             if (value.isEmpty()) return null;
             char first = value.charAt(0);
@@ -179,6 +231,33 @@ public final class Query {
             } catch (NumberFormatException e) {
                 return null;
             }
+        }
+
+        /** Like {@link #parse} with a duration such as {@code 2h} or {@code 7d}, in millis. A unit is required except for 0. */
+        static Comparison parseDuration(String value) {
+            if (value.isEmpty()) return null;
+            char first = value.charAt(0);
+            char operator = first == '<' || first == '>' || first == '=' ? first : '=';
+            Matcher matcher = DURATION.matcher(operator == first ? value.substring(1).trim() : value);
+            if (!matcher.matches()) return null;
+            long amount;
+            try {
+                amount = Long.parseLong(matcher.group(1));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+            String unit = matcher.group(2);
+            if (unit == null) return amount == 0 ? new Comparison(operator, 0) : null;
+            long size = switch (unit) {
+                case "m", "min" -> MINUTE;
+                case "h" -> HOUR;
+                case "d" -> DAY;
+                case "w" -> 7 * DAY;
+                case "mo" -> 30 * DAY;
+                default -> 365 * DAY;
+            };
+            if (amount > Long.MAX_VALUE / size) return null;
+            return new Comparison(operator, amount * size);
         }
 
         boolean test(long actual) {

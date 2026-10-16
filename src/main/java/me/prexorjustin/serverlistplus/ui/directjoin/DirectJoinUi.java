@@ -1,5 +1,6 @@
-package me.prexorjustin.serverlistplus.ui;
+package me.prexorjustin.serverlistplus.ui.directjoin;
 
+import me.prexorjustin.serverlistplus.ui.text.NameText;
 import me.prexorjustin.serverlistplus.ServerListPlus;
 import me.prexorjustin.serverlistplus.bridge.MultiplayerScreenHook;
 import me.prexorjustin.serverlistplus.bridge.Pings;

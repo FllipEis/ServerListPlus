@@ -1,4 +1,4 @@
-package me.prexorjustin.serverlistplus.ui;
+package me.prexorjustin.serverlistplus.ui.widget;
 
 import me.prexorjustin.serverlistplus.compat.Gfx;
 
@@ -52,7 +52,23 @@ public enum Glyph {
         "#..##.#",
         "#.....#",
         ".#...#.",
-        "..###..");
+        "..###.."),
+    CLOSE(
+        "#.....#",
+        ".#...#.",
+        "..#.#..",
+        "...#...",
+        "..#.#..",
+        ".#...#.",
+        "#.....#"),
+    NOTE(
+        "#####..",
+        "#...##.",
+        "#.....#",
+        "#.###.#",
+        "#.....#",
+        "#.###.#",
+        "#######");
 
     private final String[] rows;
 

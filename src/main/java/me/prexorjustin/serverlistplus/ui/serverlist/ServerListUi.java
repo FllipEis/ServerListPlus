@@ -2,15 +2,14 @@ package me.prexorjustin.serverlistplus.ui.serverlist;
 
 import me.prexorjustin.serverlistplus.ServerListPlus;
 import me.prexorjustin.serverlistplus.bridge.MultiplayerScreenHook;
+import me.prexorjustin.serverlistplus.bridge.ServerEntryHook;
 import me.prexorjustin.serverlistplus.bridge.ServerListBridge;
 import me.prexorjustin.serverlistplus.bridge.ServerView;
 import me.prexorjustin.serverlistplus.compat.Key;
 import me.prexorjustin.serverlistplus.compat.Pointer;
 import me.prexorjustin.serverlistplus.core.style.Styled;
-import me.prexorjustin.serverlistplus.ui.ContextMenu;
-import me.prexorjustin.serverlistplus.ui.DividerEntry;
-import me.prexorjustin.serverlistplus.ui.HiddenSectionEntry;
-import me.prexorjustin.serverlistplus.ui.TabStrip;
+import me.prexorjustin.serverlistplus.ui.widget.ContextMenu;
+import me.prexorjustin.serverlistplus.ui.widget.TabStrip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -30,6 +29,8 @@ public final class ServerListUi implements UiContext {
     /** Space reserved above the server list for the tab row. */
     public static final int TAB_ROW = 24;
     private static final int MARGIN = 6;
+    /** Narrowest list next to the docked info card: rows of 230 instead of vanilla's 305 (see ServerSelectionListMixin). */
+    private static final int MIN_DOCKED_LIST_WIDTH = 260;
 
     private final Screen screen;
     private final MultiplayerScreenHook hook;
@@ -41,6 +42,7 @@ public final class ServerListUi implements UiContext {
     private final DividerController dividers;
     private final ServerDragging dragging;
     private final ServerMenu serverMenu;
+    private final InfoCardController infoCard;
 
     private ContextMenu menu;
     private AbstractWidget focusAfterClick;
@@ -60,7 +62,8 @@ public final class ServerListUi implements UiContext {
         this.header = new HeaderRow(this);
         this.dividers = new DividerController(this, styles);
         this.dragging = new ServerDragging(this);
-        this.serverMenu = new ServerMenu(this, tabs, dividers);
+        this.infoCard = new InfoCardController(this);
+        this.serverMenu = new ServerMenu(this, tabs, dividers, infoCard);
         tabs.update();
     }
 
@@ -129,7 +132,8 @@ public final class ServerListUi implements UiContext {
 
     /**
      * The tab row (or only the header controls, with the sidebar) above the list; the sidebar,
-     * if shown, to the left of it. Can be repeated, e.g. when tab names change.
+     * if shown, to the left of it, and an open info card to the right of it when there is room.
+     * Can be repeated, e.g. when tab names change.
      */
     @Override
     public void relayout() {
@@ -140,6 +144,15 @@ public final class ServerListUi implements UiContext {
         if (sidebarWidth > 0) tabs.placeSidebar(listX + MARGIN, top, height);
         int x = listX + sidebarWidth;
         int width = listWidth - sidebarWidth;
+        InfoCardController.Dock dock = null;
+        if (infoCard.isOpen()) {
+            int cardWidth = Math.min(ServerInfoPanel.WIDTH, width - MIN_DOCKED_LIST_WIDTH - 2 * MARGIN);
+            if (cardWidth >= ServerInfoPanel.MIN_WIDTH) {
+                width -= cardWidth + 2 * MARGIN;
+                // From the tab row down to the end of the list; the tab row stays left of it
+                dock = new InfoCardController.Dock(x + width + MARGIN, listY + 2, cardWidth, listHeight - 2);
+            }
+        }
         ServerSelectionList list = list();
         if (list.getX() != x || list.getY() != top || list.getWidth() != width || list.getHeight() != height) {
             // Since 1.21.9 rows store their position, so x must be known when they are placed
@@ -153,9 +166,11 @@ public final class ServerListUi implements UiContext {
 
         int rowY = listY + 2;
         boolean shown = !wallpaper.isActive();
-        int controls = header.layout(MARGIN, screen.width - MARGIN, rowY, shown);
+        int rowRight = dock != null ? dock.x() - MARGIN : screen.width - MARGIN;
+        int controls = header.layout(MARGIN, rowRight, rowY, shown);
         tabs.placeRow(MARGIN, rowY, controls - MARGIN);
         tabs.show(shown);
+        infoCard.place(dock);
     }
 
     private void adjustWallpaper(String tab, Styled style) {
@@ -171,6 +186,11 @@ public final class ServerListUi implements UiContext {
         header.tick();
         tabs.tick();
         dividers.tick();
+        // The docked card shows whichever server is selected
+        if (infoCard.isDocked() && list().getSelected() instanceof ServerSelectionList.OnlineServerEntry online
+            && online.getServerData() != infoCard.server()) {
+            infoCard.show(online.getServerData());
+        }
     }
 
     public void openSearch() {
@@ -179,6 +199,17 @@ public final class ServerListUi implements UiContext {
 
     public void updateSortTooltip() {
         header.updateTooltips();
+    }
+
+    /** The screen is left (joining a server, editing one, going back): keeps what was typed. */
+    public void close() {
+        infoCard.closeQuietly();
+        ServerListPlus.save();
+    }
+
+    /** Whether the info card lies over the list, rather than docked next to it. */
+    public boolean isCardCovering() {
+        return infoCard.isCovering();
     }
 
     /** @return true if the scroll was used and vanilla must not handle it */
@@ -190,7 +221,18 @@ public final class ServerListUi implements UiContext {
     public boolean press(Pointer pointer) {
         focusAfterClick = null;
         header.pressAnywhere(pointer);
-        if (serverMenu.isInfoOpen()) return serverMenu.pressInfo(pointer);
+        if (infoCard.isOpen()) {
+            switch (infoCard.press(pointer)) {
+                case USED -> {
+                    return true;
+                }
+                case INPUT -> {
+                    return false;
+                }
+                case ELSEWHERE -> {
+                }
+            }
+        }
         if (wallpaper.isActive()) return wallpaper.press(pointer);
         if (menu != null) {
             if (!menu.contains(pointer.x(), pointer.y()) || menu.click(pointer.x(), pointer.y())) closeMenu();
@@ -214,6 +256,11 @@ public final class ServerListUi implements UiContext {
         dividers.pressElsewhere();
 
         ServerSelectionList.OnlineServerEntry entry = over instanceof ServerSelectionList.OnlineServerEntry online ? online : null;
+        if (pointer.isLeft() && entry != null && ((ServerEntryHook) entry).serverlistplus$isOverNotes(pointer.x(), pointer.y())) {
+            list().setSelected(entry);
+            infoCard.open(entry.getServerData());
+            return true;
+        }
         if (pointer.isRight() && entry != null) {
             list().setSelected(entry);
             serverMenu.open(entry.getServerData(), (int) pointer.x(), (int) pointer.y());
@@ -243,7 +290,11 @@ public final class ServerListUi implements UiContext {
 
     /** @return true if the key was used and vanilla must not handle it */
     public boolean key(Key key) {
-        if (serverMenu.isInfoOpen()) return serverMenu.keyInfo(key);
+        if (infoCard.isOpen()) {
+            if (infoCard.key(key)) return true;
+            // Typing in the card is for the card; next to a docked card the rest works as usual
+            if (infoCard.isCovering() || infoCard.hasFocus()) return false;
+        }
         if (wallpaper.key(key) || dividers.key(key) || tabs.key(key)) return true;
         if (menu != null && key == Key.ESCAPE) {
             closeMenu();

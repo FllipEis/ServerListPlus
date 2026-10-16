@@ -1,5 +1,6 @@
-package me.prexorjustin.serverlistplus.ui;
+package me.prexorjustin.serverlistplus.ui.directjoin;
 
+import me.prexorjustin.serverlistplus.ui.widget.SlpWidget;
 import me.prexorjustin.serverlistplus.ServerListPlus;
 import me.prexorjustin.serverlistplus.bridge.Pings;
 import me.prexorjustin.serverlistplus.compat.Gfx;

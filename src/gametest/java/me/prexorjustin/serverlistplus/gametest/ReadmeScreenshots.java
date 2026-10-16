@@ -13,7 +13,7 @@ import me.prexorjustin.serverlistplus.core.model.Store;
 import me.prexorjustin.serverlistplus.core.model.TabLayout;
 import me.prexorjustin.serverlistplus.core.model.ViewSettings;
 import me.prexorjustin.serverlistplus.core.style.Palette;
-import me.prexorjustin.serverlistplus.ui.IconButton;
+import me.prexorjustin.serverlistplus.ui.widget.IconButton;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.client.Minecraft;

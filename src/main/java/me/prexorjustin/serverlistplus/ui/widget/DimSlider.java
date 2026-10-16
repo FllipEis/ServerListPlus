@@ -1,4 +1,4 @@
-package me.prexorjustin.serverlistplus.ui;
+package me.prexorjustin.serverlistplus.ui.widget;
 
 import me.prexorjustin.serverlistplus.core.style.WallpaperFrame;
 import net.minecraft.client.gui.components.AbstractSliderButton;

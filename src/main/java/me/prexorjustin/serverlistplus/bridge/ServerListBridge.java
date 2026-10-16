@@ -5,7 +5,7 @@ import me.prexorjustin.serverlistplus.core.model.Divider;
 import me.prexorjustin.serverlistplus.core.view.DividerLayout;
 import me.prexorjustin.serverlistplus.mixin.AbstractSelectionListInvoker;
 import me.prexorjustin.serverlistplus.mixin.ServerListAccessor;
-import me.prexorjustin.serverlistplus.ui.DividerEntry;
+import me.prexorjustin.serverlistplus.ui.serverlist.DividerEntry;
 import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;

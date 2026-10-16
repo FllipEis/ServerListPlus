@@ -15,6 +15,9 @@ import net.minecraft.client.multiplayer.ServerList;
 public interface MultiplayerScreenHook {
     Query serverlistplus$query();
 
+    /** Whether the info card lies over the list, so rows must not react to the pointer. */
+    boolean serverlistplus$isCardCovering();
+
     String serverlistplus$search();
 
     void serverlistplus$setSearch(String value);
@@ -35,6 +38,9 @@ public interface MultiplayerScreenHook {
 
     /** Adds a widget that is only drawn, on top of everything added before. */
     void serverlistplus$addOverlay(AbstractWidget widget);
+
+    /** Adds a widget that gets clicks before everything else, also where it lies over the list. */
+    void serverlistplus$addInFront(AbstractWidget widget);
 
     void serverlistplus$remove(AbstractWidget widget);
 

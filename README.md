@@ -13,13 +13,16 @@ without touching `servers.dat`. Remove the mod and your server list is exactly a
 - **Tabs for folders**: "All" plus one tab per folder, as a row above the list or as a sidebar.
   A server can be in any number of folders; drag it onto a tab to put it there.
 - **Smart folders**: save a search as a folder that fills itself, e.g. `tag:pvp ping:<80`.
-- **Search and filters**: by name, address and MOTD, plus `tag:`, `folder:`, `ping:`, `players:`,
-  `domain:`, `is:pinned` and `is:hidden`. See [Search](#search).
+- **Search and filters**: by name, address, MOTD and notes, plus `tag:`, `folder:`, `note:`, `has:`,
+  `ping:`, `players:`, `played:`, `last:`, `domain:` and `is:`. See [Search](#search).
 - **Sorting**: manually by drag and drop, or by name, ping, players or last played.
 - **Pinning**: keep servers at the top of a tab, also while sorting automatically.
 - **Dividers**: titled, colored separators to group servers within a tab.
 - **Hiding**: keep servers out of "All" without deleting them; they wait in a folded section.
-- **Notes, tags and history**: per server notes and tags; last join and total playtime per address,
+- **Notes**: per server notes, marked by a symbol in the list that shows them on hover and opens
+  them on click, in a card next to the list. Optionally shown in the corner when you join the
+  server, e.g. for coordinates.
+- **Tags and history**: per server tags; last join and total playtime per address,
   shown next to the name, as a clock symbol, on hover or not at all.
 - **Colored names**: MiniMessage tags in server names, e.g. `<gradient:#ff5555:#ffaa00>Hypixel</gradient> <gray>Lobby`.
 - **Direct Connection**: a live preview of the typed server and the addresses you joined last.
@@ -57,6 +60,7 @@ without touching `servers.dat`. Remove the mod and your server list is exactly a
 | Change a tab's color, symbol or background | Right click the tab |
 | Put a server into folders | Right click it → **Folders**, or drag it onto a tab |
 | Pin, hide or annotate a server | Right click it |
+| Read or edit a server's notes | Hover or click the note symbol next to its name |
 | Add a divider | Right click a server → **Insert divider above** |
 | Search | Click the magnifier or press **Ctrl+F** |
 | Change sorting | Click the arrows next to the search |
@@ -77,18 +81,24 @@ All terms must match. Case and Minecraft color codes are ignored.
 
 | Term | Matches |
 |---|---|
-| `survival` | name, address or MOTD contains the word |
+| `survival` | name, address, MOTD or notes contain the word |
 | `"mini games"` | the exact phrase |
 | `tag:pvp` | a tag starting with "pvp" (`tag:"mini g"` works too) |
 | `folder:friends` | one of its folders contains "friends" |
+| `note:base` | the notes contain "base" |
+| `has:notes`, `has:tags`, `has:folder` | has notes, tags or is in a folder |
 | `is:pinned` | pinned in any tab |
 | `is:hidden` | hidden from "All"; searching for it shows them there |
+| `is:online`, `is:offline` | the last ping reached the server or failed |
 | `ping:<100`, `players:>10` | compares ping or online players with `<`, `>` or `=` |
+| `played:>2h`, `played:0` | compares the total playtime; `0` finds servers never played |
+| `last:<7d` | last joined less than 7 days ago (`min`, `h`, `d`, `w`, `mo`, `y`) |
 | `domain:example.com` | that domain and its subdomains (`host:` works too) |
 | `domain:*.example.com` | `*` matches anything, here only subdomains |
 | `-term` | negates any term, e.g. `-tag:modded` |
 
-Servers that were not pinged yet or are offline never match `ping:` or `players:`.
+Servers that were not pinged yet or are offline never match `ping:` or `players:`, and servers
+never joined never match `last:`.
 
 ## Your data
 

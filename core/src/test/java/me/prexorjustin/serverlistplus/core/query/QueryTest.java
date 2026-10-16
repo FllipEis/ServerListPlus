@@ -192,4 +192,100 @@ class QueryTest {
         assertFalse(Query.parse("-is:hidden").wantsHidden());
         assertFalse(Query.parse("hidden").wantsHidden());
     }
+
+    private record Tracked(ServerRef.Status status, long lastPlayed, long playtimeMs) implements ServerRef {
+        @Override
+        public String name() {
+            return "Tracked";
+        }
+
+        @Override
+        public String address() {
+            return "tracked.example.com";
+        }
+
+        @Override
+        public String motd() {
+            return "";
+        }
+    }
+
+    private static final long NOW = 1_000_000_000_000L;
+    private static final long HOUR = 3_600_000;
+    private static final long DAY = 24 * HOUR;
+
+    private static boolean matchesAt(String query, ServerRef server) {
+        return Query.parse(query).matches(server, null, FOLDERS, NOW);
+    }
+
+    @Test
+    void textAlsoMatchesNotes() {
+        ServerMeta meta = new ServerMeta();
+        meta.setNotes("Base at §a-120 64 300, ask Steve");
+        assertTrue(matches("steve", HYPIXEL, meta));
+        assertTrue(matches("note:\"-120 64\"", HYPIXEL, meta));
+        assertFalse(matches("note:hypixel", HYPIXEL, meta), "note: looks only at the notes");
+        assertFalse(matches("note:steve", HYPIXEL, null));
+    }
+
+    @Test
+    void hasFilters() {
+        ServerMeta meta = new ServerMeta();
+        assertFalse(matches("has:notes", HYPIXEL, meta));
+        assertFalse(matches("has:tags", HYPIXEL, meta));
+        assertFalse(matches("has:folder", HYPIXEL, null));
+        meta.setNotes("  ");
+        assertFalse(matches("has:notes", HYPIXEL, meta), "blank notes are no notes");
+        meta.setNotes("x");
+        meta.setTags(List.of("pvp"));
+        meta.addToFolder("f1");
+        assertTrue(matches("has:notes has:tags has:folder", HYPIXEL, meta));
+        assertTrue(matches("-has:notes", HYPIXEL, null));
+        assertFalse(matches("has:everything", HYPIXEL, meta), "unknown has: value is text");
+    }
+
+    @Test
+    void onlineAndOffline() {
+        Tracked online = new Tracked(ServerRef.Status.ONLINE, 0, 0);
+        Tracked offline = new Tracked(ServerRef.Status.OFFLINE, 0, 0);
+        Tracked unknown = new Tracked(ServerRef.Status.UNKNOWN, 0, 0);
+        assertTrue(matchesAt("is:online", online));
+        assertFalse(matchesAt("is:online", offline));
+        assertTrue(matchesAt("is:offline", offline));
+        assertFalse(matchesAt("is:online", unknown));
+        assertFalse(matchesAt("is:offline", unknown), "not pinged yet is neither");
+    }
+
+    @Test
+    void playtimeComparison() {
+        Tracked twoHours = new Tracked(ServerRef.Status.UNKNOWN, NOW - DAY, 2 * HOUR + 1);
+        Tracked never = new Tracked(ServerRef.Status.UNKNOWN, 0, 0);
+        assertTrue(matchesAt("played:>2h", twoHours));
+        assertFalse(matchesAt("played:>3h", twoHours));
+        assertTrue(matchesAt("played:<130min", twoHours));
+        assertTrue(matchesAt("played:<1d", twoHours));
+        assertTrue(matchesAt("played:0", never));
+        assertFalse(matchesAt("played:0", twoHours));
+        assertTrue(matchesAt("playtime:>0", twoHours));
+    }
+
+    @Test
+    void lastJoinedComparison() {
+        Tracked yesterday = new Tracked(ServerRef.Status.UNKNOWN, NOW - DAY, HOUR);
+        Tracked longAgo = new Tracked(ServerRef.Status.UNKNOWN, NOW - 400 * DAY, HOUR);
+        Tracked never = new Tracked(ServerRef.Status.UNKNOWN, 0, 0);
+        assertTrue(matchesAt("last:<7d", yesterday));
+        assertFalse(matchesAt("last:<7d", longAgo));
+        assertTrue(matchesAt("last:>1y", longAgo));
+        assertTrue(matchesAt("last:>2w", longAgo));
+        assertTrue(matchesAt("last:<2mo", yesterday));
+        assertFalse(matchesAt("last:<100y", never), "never joined has no last join");
+        assertTrue(matchesAt("-last:<100y", never));
+    }
+
+    @Test
+    void durationsNeedAUnit() {
+        assertFalse(matchesAt("played:>5", new Tracked(ServerRef.Status.UNKNOWN, 0, 10 * HOUR)), "a bare number is text");
+        assertFalse(matchesAt("last:<soon", new Tracked(ServerRef.Status.UNKNOWN, NOW, 0)));
+    }
 }
