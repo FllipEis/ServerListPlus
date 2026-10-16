@@ -123,12 +123,7 @@ public final class Wallpapers {
         return kind == Wallpaper.Kind.IMAGE || kind == Wallpaper.Kind.SERVER_ICON;
     }
 
-    /**
-     * Moves the picture of a tab by a mouse movement, so it follows the pointer.
-     *
-     * @param width  width of the area the picture is drawn in
-     * @param height height of the area the picture is drawn in
-     */
+    /** Moves the picture of a tab by a mouse movement, so it follows the pointer. */
     public static void pan(String tab, Styled style, int width, int height, double dx, double dy) {
         Texture texture = CURRENT.get(tab);
         if (texture == null) return;

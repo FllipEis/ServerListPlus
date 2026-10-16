@@ -7,7 +7,6 @@ package me.prexorjustin.serverlistplus.core.session;
 public final class TimeFormat {
     public enum Unit { MINUTES, HOURS, DAYS, WEEKS, MONTHS, YEARS }
 
-    /** An amount in a unit, e.g. 3 DAYS. */
     public record Amount(long value, Unit unit) {
     }
 

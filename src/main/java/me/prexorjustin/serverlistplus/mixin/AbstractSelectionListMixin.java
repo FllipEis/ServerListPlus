@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
- * The background drawing lives in the shared list class; only the server list gets a wallpaper,
- * and it makes sure the rows are where the list is before they are drawn.
+ * Background drawing lives in the shared list class. Only the server list gets a wallpaper, and
+ * its rows get moved back into place before they're drawn.
  */
 @Mixin(AbstractSelectionList.class)
 public abstract class AbstractSelectionListMixin {
@@ -31,10 +31,9 @@ public abstract class AbstractSelectionListMixin {
     }
 
     /**
-     * Since 1.21.9 rows store their position and only take a new one when the list is resized or
-     * scrolled. Coming back from a server, the server list (shifted by the tab sidebar) was seen
-     * with its rows still where the list used to be, until the next scroll. Doing what scrolling
-     * does whenever they are out of place keeps them under the list, whatever moved it.
+     * Since 1.21.9 rows store their position and only update it on resize or scroll. Coming back
+     * from a server, the list (shifted by the tab sidebar) showed its rows at the old spot until
+     * the next scroll. So do what scrolling does whenever they're out of place.
      */
     @Unique
     private static void serverlistplus$keepRowsInPlace(ServerSelectionList list) {

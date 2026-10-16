@@ -3,9 +3,6 @@ package me.prexorjustin.serverlistplus.compat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.Toast;
 
-/**
- * Shows toasts in the corner of the screen.
- */
 public final class Toasts {
     private Toasts() {
     }

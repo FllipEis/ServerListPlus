@@ -8,14 +8,10 @@ import com.mojang.blaze3d.Blaze3D;
 *///?} else
 /*import net.minecraft.Util;*/
 
-/**
- * The operating system's file manager.
- */
 public final class FileManager {
     private FileManager() {
     }
 
-    /** Opens a directory in the system file manager. */
     public static void open(Path directory) {
         //? if >=26.3 {
         Blaze3D.openPath(directory);

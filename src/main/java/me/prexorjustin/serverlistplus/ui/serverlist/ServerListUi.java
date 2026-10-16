@@ -22,8 +22,8 @@ import java.util.List;
  * Everything ServerListPlus adds to the multiplayer screen: tabs, the header controls, menus,
  * drag and drop and in-place editing. Created anew on every {@code init()}.
  * <p>
- * This class only lays the parts out and hands input to them in a fixed order: an open info
- * card or wallpaper toolbar first, then an open menu, then whatever is under the pointer.
+ * Lays the parts out and hands input to them in a fixed order: an open info card or wallpaper
+ * toolbar first, then an open menu, then whatever is under the pointer.
  */
 public final class ServerListUi implements UiContext {
     /** Space reserved above the server list for the tab row. */
@@ -66,8 +66,6 @@ public final class ServerListUi implements UiContext {
         this.serverMenu = new ServerMenu(this, tabs, dividers, infoCard);
         tabs.update();
     }
-
-    // ---- UiContext ----
 
     @Override
     public Screen screen() {
@@ -116,8 +114,6 @@ public final class ServerListUi implements UiContext {
     public void focusAfterClick(AbstractWidget widget) {
         focusAfterClick = widget;
     }
-
-    // ---- Layout ----
 
     /** Call right after vanilla positioned the list: makes room for the tabs above or next to it. */
     public void layoutList() {
@@ -179,8 +175,6 @@ public final class ServerListUi implements UiContext {
         wallpaper.start(tab, style, MARGIN, listY + 2);
         relayout();
     }
-
-    // ---- Called by the screen ----
 
     public void tick() {
         header.tick();

@@ -89,8 +89,6 @@ public final class MiniText {
         return new Result(merge(spans), true);
     }
 
-    // ---- Parsing into a tree ----
-
     /** A tag with the text and tags inside it, or a piece of text. */
     private static final class Node {
         final Tag tag;
@@ -303,8 +301,6 @@ public final class MiniText {
             return null;
         }
     }
-
-    // ---- Turning the tree into spans ----
 
     /** Hands out one color per character for a gradient or rainbow. */
     private interface Colorizer {

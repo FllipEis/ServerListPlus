@@ -3,9 +3,7 @@ package me.prexorjustin.serverlistplus.bridge;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
 
-/**
- * Implemented by {@code ServerSelectionList} through a mixin.
- */
+/** Implemented by {@code ServerSelectionList} via mixin. */
 public interface ServerSelectionListHook {
     JoinMultiplayerScreen serverlistplus$screen();
 

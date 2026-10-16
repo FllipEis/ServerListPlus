@@ -134,7 +134,7 @@ public final class TabBar extends TabStrip {
     public List<Slot> slots() {
         List<Slot> slots = new ArrayList<>();
         if (!overflows()) {
-            // Everything fits: centered, like before
+            // Everything fits, just center it
             int x = this.getX() + (this.getWidth() - contentWidth()) / 2;
             for (Tab tab : tabs) {
                 int width = tabWidth(tab);

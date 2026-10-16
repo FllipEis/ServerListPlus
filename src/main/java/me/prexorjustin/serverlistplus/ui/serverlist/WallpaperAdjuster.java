@@ -40,10 +40,7 @@ final class WallpaperAdjuster {
         return style != null;
     }
 
-    /**
-     * @param margin space kept free at both ends of the toolbar
-     * @param y      top of the toolbar
-     */
+    /** @param margin space kept free at both ends of the toolbar */
     void start(String tab, Styled style, int margin, int y) {
         this.style = style;
         this.tab = tab;

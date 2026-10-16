@@ -191,11 +191,7 @@ public final class ContextMenu extends SlpWidget {
         panels.add(sub);
     }
 
-    /**
-     * Handles a click.
-     *
-     * @return true if the menu should close
-     */
+    /** @return true if the menu should close */
     public boolean click(double x, double y) {
         int level = panelAt(x, y);
         if (level < 0) return true;

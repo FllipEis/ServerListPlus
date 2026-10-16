@@ -96,8 +96,6 @@ public abstract class JoinMultiplayerScreenMixin extends Screen implements Multi
         super(title);
     }
 
-    // ---- MultiplayerScreenHook ----
-
     @Override
     public Query serverlistplus$query() {
         return serverlistplus$query;
@@ -182,8 +180,6 @@ public abstract class JoinMultiplayerScreenMixin extends Screen implements Multi
         ServerView.refresh(serverSelectionList, servers);
     }
 
-    // ---- Layout ----
-
     @Inject(method = "init", at = @At("TAIL"))
     private void serverlistplus$addControls(CallbackInfo ci) {
         EditBox box = new EditBox(this.font, 0, 0, 100, ROW_HEIGHT, SEARCH_HINT);
@@ -215,8 +211,6 @@ public abstract class JoinMultiplayerScreenMixin extends Screen implements Multi
         if (wasEmpty && serverlistplus$query.isEmpty()) return;
         ServerView.showFromTop(serverSelectionList, servers);
     }
-
-    // ---- Sorting ----
 
     @Override
     public void serverlistplus$setSort(SortMode mode) {
@@ -281,8 +275,6 @@ public abstract class JoinMultiplayerScreenMixin extends Screen implements Multi
     }
     *///?}
 
-    // ---- Adding and editing servers ----
-
     @Inject(method = "addServerCallback", at = @At("HEAD"))
     private void serverlistplus$beforeAdd(boolean confirmed, CallbackInfo ci) {
         if (!confirmed) return;
@@ -321,8 +313,6 @@ public abstract class JoinMultiplayerScreenMixin extends Screen implements Multi
         server.name = split.name();
         return folder;
     }
-
-    // ---- Keyboard ----
 
     //? if >=1.21.9 {
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
@@ -363,8 +353,7 @@ public abstract class JoinMultiplayerScreenMixin extends Screen implements Multi
         }
     }
 
-    // ---- Mouse: ServerListPlus sees every event before vanilla ----
-
+    // ServerListPlus sees every mouse event before vanilla
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (serverlistplus$ui != null && serverlistplus$ui.scroll(mouseX, mouseY, scrollY)) return true;

@@ -59,8 +59,6 @@ final class TabController implements TabStrip.Listener {
         return sidebarShown ? sidebar : bar;
     }
 
-    // ---- Layout ----
-
     /**
      * Decides between row and sidebar for a list of the given width.
      *
@@ -89,8 +87,6 @@ final class TabController implements TabStrip.Listener {
         sidebar.active = sidebar.visible && editor == null;
         if (editor != null) placeEditor();
     }
-
-    // ---- Tabs ----
 
     private int count(String tab) {
         int count = 0;
@@ -238,8 +234,6 @@ final class TabController implements TabStrip.Listener {
             Component.translatable(folder.isSmart() ? "serverlistplus.folder.delete.smart" : "serverlistplus.folder.delete.message")
         ));
     }
-
-    // ---- Renaming in place ----
 
     /**
      * Renames a tab in place: the tab itself becomes a borderless text field that grows while typing.

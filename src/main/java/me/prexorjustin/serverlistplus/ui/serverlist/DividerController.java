@@ -69,8 +69,6 @@ final class DividerController {
         ui.openMenu(items, x, y);
     }
 
-    // ---- Renaming in place ----
-
     /** Edits a divider title in place, on top of its row. */
     private void startEditing(Divider divider) {
         finishEditing(true);
@@ -119,8 +117,6 @@ final class DividerController {
         finishEditing(key == Key.CONFIRM);
         return true;
     }
-
-    // ---- Clicks and dragging ----
 
     /**
      * Right click opens the menu, a double click renames, a press may start dragging.

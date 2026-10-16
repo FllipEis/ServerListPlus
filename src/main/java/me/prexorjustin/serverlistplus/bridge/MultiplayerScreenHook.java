@@ -8,10 +8,7 @@ import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
 
-/**
- * Implemented by {@code JoinMultiplayerScreen} through a mixin, so ServerListPlus code
- * can reach its state and protected helpers.
- */
+/** Implemented by {@code JoinMultiplayerScreen} via mixin, exposes its state and protected helpers. */
 public interface MultiplayerScreenHook {
     Query serverlistplus$query();
 
@@ -33,7 +30,6 @@ public interface MultiplayerScreenHook {
 
     ServerList serverlistplus$servers();
 
-    /** Adds an interactive widget. */
     void serverlistplus$add(AbstractWidget widget);
 
     /** Adds a widget that is only drawn, on top of everything added before. */
@@ -48,7 +44,6 @@ public interface MultiplayerScreenHook {
 
     void serverlistplus$join(ServerData server);
 
-    /** Changes the sort order and rebuilds the list. */
     void serverlistplus$setSort(SortMode mode);
 
     /** Rebuilds the server list from the current search, tab and sort order. */

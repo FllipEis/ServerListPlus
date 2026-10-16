@@ -53,11 +53,7 @@ public final class PlaytimeTracker {
         return true;
     }
 
-    /**
-     * Ends the session.
-     *
-     * @return true if the store changed and should be saved
-     */
+    /** @return true if the store changed and should be saved */
     public boolean leave() {
         if (server == null) return false;
         flush();

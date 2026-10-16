@@ -28,7 +28,6 @@ public final class ServerKey {
         return occurrence <= 0 ? key : key + OCCURRENCE + (occurrence + 1);
     }
 
-    /** The normalized address part of a key. */
     public static String address(String key) {
         int separator = key.indexOf(SEPARATOR);
         return separator < 0 ? key : key.substring(0, separator);

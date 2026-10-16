@@ -85,7 +85,6 @@ public final class ServerMeta {
         return tab != null && pinnedTabs.contains(tab);
     }
 
-    /** Whether the server is pinned in at least one tab. */
     public boolean isPinnedAnywhere() {
         return !pinnedTabs.isEmpty();
     }

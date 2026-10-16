@@ -80,7 +80,6 @@ public final class ServerListScreensTest implements FabricClientGameTest {
         context.waitTicks(10);
     }
 
-    /** Two entries with the same address are separate servers: each has its own folders. */
     private static void sameAddressKeepsSeparateFolders(ClientGameTestContext context) {
         context.runOnClient(minecraft -> {
             Store store = ServerListPlus.store();
@@ -95,7 +94,6 @@ public final class ServerListScreensTest implements FabricClientGameTest {
         context.takeScreenshot("02-folder-with-one-of-two-same-address-servers");
     }
 
-    /** A server hidden from "All" leaves the list and goes into the folded section at the end. */
     private static void hiddenServersFoldAway(ClientGameTestContext context) {
         context.runOnClient(minecraft -> {
             ServerView.metaOrCreate(server(minecraft, "BlockBound")).setHiddenInAll(true);
@@ -121,13 +119,13 @@ public final class ServerListScreensTest implements FabricClientGameTest {
         });
         click(context, server[0], server[1], InputConstants.MOUSE_BUTTON_RIGHT);
         context.takeScreenshot("04-server-menu");
-        click(context, 4, 4, InputConstants.MOUSE_BUTTON_LEFT); // closes the menu
+        click(context, 4, 4, InputConstants.MOUSE_BUTTON_LEFT); // Closes the menu
 
         double[] settings = context.computeOnClient(minecraft -> {
             IconButton button = minecraft.gui.screen().children().stream()
                 .filter(child -> child instanceof IconButton)
                 .map(child -> (IconButton) child)
-                .reduce((first, second) -> second) // settings is the last of the three
+                .reduce((first, second) -> second) // Settings is the last of the three
                 .orElseThrow(() -> new AssertionError("no header icons"));
             return new double[]{button.getX() + button.getWidth() / 2.0, button.getY() + button.getHeight() / 2.0};
         });
@@ -277,7 +275,6 @@ public final class ServerListScreensTest implements FabricClientGameTest {
         check(rows.equals(List.of(expected)), "expected rows " + List.of(expected) + ", but got " + rows);
     }
 
-    /** Names with MiniMessage tags are drawn formatted instead of as typed. */
     private static void miniMessageNames(ClientGameTestContext context) {
         context.runOnClient(minecraft -> {
             server(minecraft, "Space Chunks").name = "<gradient:#ff5555:#ffaa00>Space Chunks</gradient> <gray>SMP";

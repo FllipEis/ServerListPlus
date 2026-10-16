@@ -34,7 +34,6 @@ public final class JsonStore {
     }
 
     public enum Status {
-        /** File read successfully. */
         LOADED,
         /** No file yet, started empty. */
         MISSING,

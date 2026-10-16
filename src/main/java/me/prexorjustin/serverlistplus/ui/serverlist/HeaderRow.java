@@ -116,8 +116,6 @@ final class HeaderRow {
         return true;
     }
 
-    // ---- Sort ----
-
     private static Component sortLabel(SortMode mode) {
         return Component.translatable("serverlistplus.sort." + mode.name().toLowerCase(Locale.ROOT));
     }
@@ -151,8 +149,6 @@ final class HeaderRow {
         items.add(ContextMenu.Item.title(Component.translatable("serverlistplus.sort.pinned_first")));
         ui.openMenu(items, button.getX(), button.getBottom() + 2);
     }
-
-    // ---- Settings ----
 
     private void openSettingsMenu(IconButton button) {
         ViewSettings view = ui.store().view();

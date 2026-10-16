@@ -21,7 +21,6 @@ public final class ImageOps {
     private ImageOps() {
     }
 
-    /** @throws IOException if the data is not an image ImageIO can read */
     public static BufferedImage read(byte[] data) throws IOException {
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
         if (image == null) throw new IOException("Unsupported image format");

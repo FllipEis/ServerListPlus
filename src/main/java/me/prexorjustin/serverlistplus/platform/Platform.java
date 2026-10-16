@@ -2,9 +2,6 @@ package me.prexorjustin.serverlistplus.platform;
 
 import java.nio.file.Path;
 
-/**
- * Loader-specific functionality behind a common interface.
- */
 public sealed interface Platform {
     Platform INSTANCE =
         /*? if fabric {*/new FabricPlatform();

@@ -55,8 +55,7 @@ public final class DirectJoinUi implements DirectHistory.Listener {
     }
 
     /**
-     * Arranges the screen top to bottom: label and input, preview, history, and the two buttons
-     * side by side at the bottom.
+     * Top to bottom: label and input, preview, history, then both buttons side by side.
      *
      * @return the widgets to add to the screen
      */
@@ -136,8 +135,6 @@ public final class DirectJoinUi implements DirectHistory.Listener {
         }
         return null;
     }
-
-    // ---- DirectHistory.Listener ----
 
     @Override
     public void pick(String address) {

@@ -12,22 +12,22 @@ import java.util.regex.Pattern;
 /**
  * A parsed search query. All terms must match (AND).
  * <ul>
- *     <li>{@code word} – name, address, MOTD or notes contain the word</li>
- *     <li>{@code "two words"} – quoted phrase</li>
- *     <li>{@code tag:pvp} – a tag starts with "pvp"</li>
- *     <li>{@code folder:friends} – the name of one of its folders contains "friends"</li>
- *     <li>{@code note:base} – the notes contain "base"</li>
- *     <li>{@code has:notes}, {@code has:tags}, {@code has:folder} – servers with notes, tags or a folder</li>
- *     <li>{@code is:pinned} – servers pinned in any tab</li>
- *     <li>{@code is:hidden} – servers hidden from "All"; searching for it shows them there</li>
- *     <li>{@code is:online}, {@code is:offline} – the last ping reached the server or failed</li>
- *     <li>{@code ping:<100}, {@code players:>10} – compare ping or online players ({@code <}, {@code >}, {@code =})</li>
- *     <li>{@code played:>2h} – compares the total playtime, {@code played:0} for never played</li>
- *     <li>{@code last:<7d} – last joined less than 7 days ago; servers never joined don't match.
+ *     <li>{@code word} - name, address, MOTD or notes contain the word</li>
+ *     <li>{@code "two words"} - quoted phrase</li>
+ *     <li>{@code tag:pvp} - a tag starts with "pvp"</li>
+ *     <li>{@code folder:friends} - the name of one of its folders contains "friends"</li>
+ *     <li>{@code note:base} - the notes contain "base"</li>
+ *     <li>{@code has:notes}, {@code has:tags}, {@code has:folder} - servers with notes, tags or a folder</li>
+ *     <li>{@code is:pinned} - servers pinned in any tab</li>
+ *     <li>{@code is:hidden} - servers hidden from "All"; searching for it shows them there</li>
+ *     <li>{@code is:online}, {@code is:offline} - the last ping reached the server or failed</li>
+ *     <li>{@code ping:<100}, {@code players:>10} - compare ping or online players ({@code <}, {@code >}, {@code =})</li>
+ *     <li>{@code played:>2h} - compares the total playtime, {@code played:0} for never played</li>
+ *     <li>{@code last:<7d} - last joined less than 7 days ago; servers never joined don't match.
  *         Units: {@code min}, {@code h}, {@code d}, {@code w}, {@code mo}, {@code y}</li>
- *     <li>{@code domain:example.com} – the address is that domain or a subdomain of it;
+ *     <li>{@code domain:example.com} - the address is that domain or a subdomain of it;
  *         {@code *} matches anything, e.g. {@code domain:*.example.com} for subdomains only</li>
- *     <li>{@code -term} – negates any of the above</li>
+ *     <li>{@code -term} - negates any of the above</li>
  * </ul>
  * Matching ignores case and Minecraft formatting codes.
  */

@@ -68,13 +68,8 @@ public final class Gfx {
     }
 
     /**
-     * Draws part of a texture stretched to a rectangle.
-     *
-     * @param u          left edge of the part, in texture pixels
-     * @param v          top edge of the part, in texture pixels
-     * @param partWidth  width of the part, in texture pixels
-     * @param partHeight height of the part, in texture pixels
-     * @param tint       ARGB color the texture is multiplied with, 0xFFFFFFFF for none
+     * Draws part of a texture stretched to a rectangle. u, v, partWidth and partHeight are in
+     * texture pixels. tint is ARGB and gets multiplied in, 0xFFFFFFFF for none.
      */
     public void image(Identifier texture, int x, int y, int width, int height,
                       int u, int v, int partWidth, int partHeight, int textureWidth, int textureHeight, int tint) {
