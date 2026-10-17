@@ -3,6 +3,12 @@
 All notable changes are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-10-17
+
+### Fixed
+- The mod showed a "Template Mod" placeholder as its icon in launchers and mod lists; it now has
+  the ServerListPlus logo.
+
 ## [1.1.0] - 2026-10-16
 
 ### Added
